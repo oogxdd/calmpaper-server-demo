@@ -1,3 +1,10 @@
-const { handleRequest } = require('../src/handler')
+import { prisma } from '../src/prisma.js'
 
-module.exports = handleRequest
+export default async function handler(_request, response) {
+  try {
+    await prisma.$queryRaw`SELECT 1`
+    response.status(200).json({ ok: true, database: 'connected' })
+  } catch {
+    response.status(503).json({ ok: false, database: 'unavailable' })
+  }
+}

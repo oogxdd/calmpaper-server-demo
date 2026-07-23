@@ -1,9 +1,10 @@
-const http = require('node:http')
-const { handleRequest } = require('./handler')
+import { createServer } from 'node:http'
+import { createCalmpaperYoga } from './app.js'
+import { config } from './config.js'
 
-const port = Number.parseInt(process.env.PORT || '4000', 10)
-const server = http.createServer(handleRequest)
+const yoga = createCalmpaperYoga('/graphql')
+const server = createServer(yoga)
 
-server.listen(port, '0.0.0.0', () => {
-  console.log(`Calmpaper demo API listening on http://localhost:${port}`)
+server.listen(config.port, () => {
+  console.log(`Calmpaper GraphQL API is running on http://localhost:${config.port}/graphql`)
 })

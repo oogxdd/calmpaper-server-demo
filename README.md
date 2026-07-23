@@ -1,55 +1,63 @@
-# Calmpaper demo API
+# Calmpaper GraphQL API
 
-A zero-dependency, read-only JSON API for the public Calmpaper demo.
+The restored Calmpaper backend: GraphQL Yoga, Prisma ORM, and PostgreSQL. This
+is the phase-one service described in
+[`docs/rehabilitation-plan.md`](docs/rehabilitation-plan.md).
 
-The original GraphQL Yoga / Prisma 2 service depended on old database,
-GetStream, SendGrid, Stripe, Google OAuth, and upload credentials. Those
-integrations are not started in demo mode. The deployable entry point exposes
-sample books, authors, comments, and a fictional cross-era social feed without
-requiring secrets or persistent storage.
+It supports email/password authentication, writers, books, pages, follows,
+libraries, likes, comments/replies, and a database-backed Following feed.
+GetStream, Stripe, Google OAuth, uploads, and transactional email remain
+disabled for this phase.
 
-## Run locally
+## Local setup
+
+Copy `.env.example` to `.env`, provide a PostgreSQL connection string, then:
 
 ```bash
 bun install
+bun run db:migrate
+bun run db:seed
 bun run dev
 ```
 
-The API starts on [http://localhost:4000](http://localhost:4000).
+GraphQL is served at `http://localhost:4000/graphql`.
 
-## Endpoints
+The idempotent seed creates six public-domain writers, six books, pages,
+follows, library entries, and fictional cross-era discussions.
 
-- `GET /api/health`
-- `GET /api/demo`
-- `GET /api/books`
-- `GET /api/books/:slug`
-- `GET /api/authors`
-- `GET /api/authors/:slug`
-- `GET /api/feed`
+Demo account:
 
-All mutation methods return `405` because the public demo is read-only.
+```text
+demo@calmpaper.com
+calmpaper
+```
 
-## Test
+## Checks
 
 ```bash
 bun run check
 ```
 
-## Deploy
+## Production
 
-The files under `api/` are explicit Vercel Function entry points, including
-dynamic book and author slugs. No environment variables are required. Set
-`DEMO_ALLOWED_ORIGIN` if the deployed API should only be readable by one
-frontend origin; otherwise GET responses use a public `*` CORS origin.
+Required environment variables:
 
-## Security notes
+- `DATABASE_URL`
+- `APP_SECRET`
+- `FRONTEND_URL`
 
-- The previously tracked PEM file has been removed from the working tree and
-  ignored. Any historical key must be considered compromised and revoked.
-- The old hard-coded Docker database password was replaced with a required
-  environment variable.
-- OAuth, payment, email, upload, and writable database routes are not exposed.
-- `prisma/` and the unused legacy modules remain only as migration reference.
+Apply migrations and seed the demo database before serving traffic:
 
-Before building a production API, rotate every historical credential and audit
-or rewrite Git history with the repository owner’s explicit coordination.
+```bash
+bun run db:migrate
+bun run db:seed
+```
+
+Vercel entry points live in `api/`; `/graphql` rewrites to `/api/graphql`.
+
+## Security boundaries
+
+- Mutation identity always comes from the signed bearer token.
+- Password hashes and integration secrets are not exposed by GraphQL.
+- Historical Google, Stream, Stripe, SendGrid, and upload code is not started.
+- Previously committed keys must still be treated as compromised and rotated.
