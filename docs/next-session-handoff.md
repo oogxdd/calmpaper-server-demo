@@ -73,6 +73,22 @@ persona: Mary Shelley
 
 The conversations are sample fiction, not historical quotations.
 
+### Phase-one stabilization follow-up
+
+Frontend commit: `d4f1309 Restore chapter reader and polish legacy layouts`
+
+Backend commit: `ab1d187 Expose chapters for restored reader`
+
+- Added a real chapter GraphQL query and Next.js reader route.
+- Made every table-of-contents row open its chapter.
+- Added chapter likes, previous/next navigation, author details, and comments.
+- Reused the original `page-read-book` visual vocabulary.
+- Fixed the 180px book-cover wrapper and the book author sidebar.
+- Restored the simpler legacy footer.
+- Removed visible demo/sample/public-domain disclaimers.
+- Generalized comments to support both books and chapters.
+- Verified login → comment mutation → PostgreSQL → reload persistence.
+
 ## Current Sprite runtime
 
 The complete phase-one stack is already running inside the current Sprite:
@@ -102,18 +118,22 @@ Service details:
 The frontend `.env.local` points server-side and proxy traffic at the internal
 GraphQL URL. PostgreSQL is not exposed over HTTP.
 
-Checkpoint `v38` contains the working stack and filesystem state.
+Checkpoint `v40` contains the verified reader, comment flow, service
+configuration, and filesystem state.
 
 ### Publishing the Sprite URL
 
 Only the frontend needs a public Sprite HTTP port. The browser talks to
 `/api/graphql`; Next.js proxies that request internally to the GraphQL service.
 
-An unrelated `karaoke` service currently owns the Sprite HTTP route on port
-8080. Do not delete, stop, or alter that service without explicit user
-authorization. To publish Calmpaper, resolve that conflict and assign the
-Sprite HTTP route to `calmpaper-web`, then change the Sprite URL auth setting
-to `public`.
+The user authorized removing the unrelated `karaoke` service. `calmpaper-web`
+now owns the Sprite HTTP route on port 3000. The remaining publishing step is
+to change the Sprite URL auth setting from `sprite` to `public`.
+
+While URL auth remains `sprite`, browser navigation works for an authenticated
+Sprite owner, but client-side POST requests to `/api/graphql` may be redirected
+to `sprites.dev/auth` and blocked by browser CORS. This is a platform auth-wall
+effect, not an application GraphQL CORS failure.
 
 The public URL must never expose environment variables, arbitrary files,
 PostgreSQL, or a generic debug endpoint.
