@@ -37,10 +37,10 @@ bun run check
 
 ## Deploy
 
-`api/index.js` and `api/[...path].js` are Vercel Function entry points. No
-environment variables are required. Set `DEMO_ALLOWED_ORIGIN` if the deployed
-API should only be readable by one frontend origin; otherwise GET responses
-use a public `*` CORS origin.
+The files under `api/` are explicit Vercel Function entry points, including
+dynamic book and author slugs. No environment variables are required. Set
+`DEMO_ALLOWED_ORIGIN` if the deployed API should only be readable by one
+frontend origin; otherwise GET responses use a public `*` CORS origin.
 
 ## Security notes
 
