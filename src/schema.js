@@ -21,6 +21,7 @@ export const typeDefs = /* GraphQL */ `
     user(slug: String!): User
     books(sort: BookSort = TOP, limit: Int = 24): [Book!]!
     book(slug: String!): Book
+    chapter(bookSlug: String!, slug: String!): Chapter
     feed(limit: Int = 30): [Activity!]!
     likeState(target: LikeTarget!, id: ID!): LikeResult!
     libraryState(bookId: ID!): LibraryResult!
@@ -230,6 +231,16 @@ export const resolvers = {
       }),
     book: (_root, { slug }, { prisma }) =>
       prisma.book.findUnique({ where: { slug } }),
+    chapter: (_root, { bookSlug, slug }, { prisma }) =>
+      prisma.chapter.findFirst({
+        where: {
+          slug,
+          book: {
+            slug: bookSlug,
+            archived: false,
+          },
+        },
+      }),
     feed: async (_root, { limit }, { prisma, userId }) => {
       let authorIds
       if (userId) {
