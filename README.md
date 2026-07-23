@@ -1,26 +1,55 @@
-# Calmpaper GraphQL Server
+# Calmpaper demo API
 
-**GraphQL server with JavaScript (Node.js)** based on [Prisma Client](https://github.com/prisma/prisma2/blob/master/docs/prisma-client-js/api.md) & [graphql-yoga](https://github.com/prisma/graphql-yoga).
+A zero-dependency, read-only JSON API for the public Calmpaper demo.
 
-## Set up a project
+The original GraphQL Yoga / Prisma 2 service depended on old database,
+GetStream, SendGrid, Stripe, Google OAuth, and upload credentials. Those
+integrations are not started in demo mode. The deployable entry point exposes
+sample books, authors, comments, and a fictional cross-era social feed without
+requiring secrets or persistent storage.
 
-add .env file inside prisma folder with the following:
+## Run locally
 
-```
-DB_URL=file:dev.db
-```
-
-
-```
-1) yarn
-2) npx prisma migrate save --name 'init' --experimental && npx prisma migrate up --experimental
-3) npx prisma generate
-4) yarn dev
+```bash
+bun install
+bun run dev
 ```
 
-The project should be up and running on http://localhost:4000
+The API starts on [http://localhost:4000](http://localhost:4000).
 
+## Endpoints
 
-## Next steps
+- `GET /api/health`
+- `GET /api/demo`
+- `GET /api/books`
+- `GET /api/books/:slug`
+- `GET /api/authors`
+- `GET /api/authors/:slug`
+- `GET /api/feed`
 
-- Explore [Prisma Documentation](https://www.prisma.io/docs/)
+All mutation methods return `405` because the public demo is read-only.
+
+## Test
+
+```bash
+bun run check
+```
+
+## Deploy
+
+`api/index.js` and `api/[...path].js` are Vercel Function entry points. No
+environment variables are required. Set `DEMO_ALLOWED_ORIGIN` if the deployed
+API should only be readable by one frontend origin; otherwise GET responses
+use a public `*` CORS origin.
+
+## Security notes
+
+- The previously tracked PEM file has been removed from the working tree and
+  ignored. Any historical key must be considered compromised and revoked.
+- The old hard-coded Docker database password was replaced with a required
+  environment variable.
+- OAuth, payment, email, upload, and writable database routes are not exposed.
+- `prisma/` and the unused legacy modules remain only as migration reference.
+
+Before building a production API, rotate every historical credential and audit
+or rewrite Git history with the repository owner’s explicit coordination.
